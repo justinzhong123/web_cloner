@@ -166,6 +166,120 @@ This is a dedicated pass AFTER screenshots and BEFORE anything else. Its purpose
 
 Save all findings to `docs/research/BEHAVIORS.md`. This is your behavior bible — reference it when writing every component spec.
 
+### JS Animation Library Extraction
+
+CSS keyframes are visible in the stylesheet, but JS-driven animations are not — they live in compiled bundles. This pass intercepts the animation library at runtime so you capture the exact target, easing, duration, and trigger of every animation. Do this AFTER the interaction sweep and BEFORE mapping page topology.
+
+1. **Detect which libraries are loaded.** Run this via browser MCP to fingerprint the common JS animation/scroll libraries:
+
+```javascript
+JSON.stringify({
+  gsap: window.gsap ? { version: window.gsap.version } : false,
+  scrollTrigger: !!(window.ScrollTrigger || window.gsap?.ScrollTrigger),
+  lenis: !!(window.Lenis || window.lenis),
+  locomotiveScroll: !!(window.LocomotiveScroll || window.locomotive),
+  framerMotion: !!document.querySelector('[data-framer-motion],[data-projection-id]'),
+  aos: !!(window.AOS || document.querySelector('[data-aos]')),
+  swiper: !!(window.Swiper || document.querySelector('.swiper')),
+  three: !!(window.THREE || document.querySelector('canvas')),
+});
+```
+
+**Step 1b — Extract CSS @keyframes (static).** Before touching the JS APIs, capture every `@keyframes` rule declared in the page's stylesheets. These are static so a single read is enough — no reload needed. Run via browser MCP:
+
+```javascript
+JSON.stringify(
+  [...document.styleSheets].flatMap(ss => {
+    try {
+      return [...ss.cssRules]
+        .filter(r => r instanceof CSSKeyframesRule)
+        .map(r => ({
+          name: r.name,
+          keyframes: [...r.cssRules].map(k => ({
+            key: k.keyText,
+            styles: k.style.cssText
+          }))
+        }))
+    } catch { return [] }
+  })
+)
+```
+
+Merge the result into `docs/research/animation-libraries.json` under a `cssKeyframes` field:
+
+```json
+{
+  "detected": { "...": "..." },
+  "cssKeyframes": [
+    { "name": "fadeUp", "keyframes": [{ "key": "0%", "styles": "opacity: 0; transform: translateY(20px)" }, { "key": "100%", "styles": "opacity: 1; transform: translateY(0)" }] }
+  ],
+  "calls": [ "..." ]
+}
+```
+
+2. **Hook GSAP if present.** Before reload, inject an interceptor with `addInitScript` (or the browser MCP equivalent that runs *before* page scripts) that wraps the GSAP API and records every call into a global array. Hook `gsap.to`, `gsap.from`, `gsap.fromTo`, `gsap.set`, `gsap.timeline`, and `ScrollTrigger.create`:
+
+```javascript
+// Injected via addInitScript so it runs before the page's own GSAP code
+window.__gsapCalls = [];
+const t0 = Date.now();
+const record = (method, target, vars) =>
+  window.__gsapCalls.push({
+    method,
+    target: typeof target === 'string' ? target
+      : target?.className || target?.id || target?.tagName || String(target),
+    vars: (() => { try { return JSON.parse(JSON.stringify(vars)); } catch { return String(vars); } })(),
+    timestamp: Date.now() - t0,
+  });
+const hook = (obj, name) => {
+  if (!obj || !obj[name]) return;
+  const orig = obj[name];
+  obj[name] = function (target, ...rest) {
+    record(name, target, name === 'fromTo' ? rest[1] : rest[0]);
+    return orig.apply(this, [target, ...rest]);
+  };
+};
+const wait = setInterval(() => {
+  if (!window.gsap) return;
+  clearInterval(wait);
+  ['to', 'from', 'fromTo', 'set', 'timeline'].forEach((m) => hook(window.gsap, m));
+  const ST = window.ScrollTrigger || window.gsap.ScrollTrigger;
+  if (ST) hook(ST, 'create');
+}, 30);
+```
+
+3. **Reload and scroll the full page** so every scroll-triggered and entrance animation fires. Then read back the collected log via browser MCP:
+
+```javascript
+JSON.stringify(window.__gsapCalls);
+```
+
+4. **Write the output to `docs/research/animation-libraries.json`** (JSON, not Markdown — it's consumed programmatically when dispatching builders). Merge the detection result from step 1 with the call log from step 3:
+
+```json
+{
+  "detected": {
+    "gsap": { "version": "3.12.5" },
+    "scrollTrigger": true,
+    "lenis": false,
+    "locomotiveScroll": false,
+    "framerMotion": false,
+    "aos": false,
+    "swiper": false,
+    "three": false
+  },
+  "cssKeyframes": [
+    { "name": "fadeUp", "keyframes": [{ "key": "0%", "styles": "opacity: 0; transform: translateY(20px)" }, { "key": "100%", "styles": "opacity: 1; transform: translateY(0)" }] }
+  ],
+  "calls": [
+    { "method": "to", "target": ".hero-title", "vars": { "y": 0, "opacity": 1, "duration": 1, "ease": "power3.out" }, "timestamp": 0 },
+    { "method": "create", "target": ".case-list", "vars": { "trigger": ".case-list", "start": "top 80%", "scrub": true }, "timestamp": 240 }
+  ]
+}
+```
+
+If no JS animation library is detected, still write the file with an empty `calls` array and all `detected` flags `false` — downstream steps check this file unconditionally.
+
 ### Page Topology
 Map out every distinct section of the page from top to bottom. Give each a working name. Document:
 - Their visual order
@@ -390,6 +504,7 @@ Based on complexity, dispatch builder agent(s) in worktree(s):
 - The target file path (e.g., `src/components/HeroSection.tsx`)
 - Instruction to verify with `npx tsc --noEmit` before finishing
 - For responsive behavior: the specific breakpoint values and what changes
+- **The section's JS animations:** filter `docs/research/animation-libraries.json` down to the `calls` whose `target` matches this section's selectors/elements, and inline that subset directly into the builder prompt (don't say "go read the JSON"). Tell the builder which library to use (e.g., GSAP + ScrollTrigger from `detected`) and to reproduce the exact `vars` — easing, duration, trigger start/end, scrub. If no calls match this section, say so explicitly so the builder doesn't invent animations.
 
 **Don't wait.** As soon as you've dispatched the builder(s) for one section, move to extracting the next section. Builders work in parallel in their worktrees while you continue extraction.
 
@@ -472,5 +587,35 @@ When done, report:
 - Build status (`npm run build` result)
 - Visual QA results (any remaining discrepancies)
 - Any known gaps or limitations
+
+## Output Packaging
+
+After the clone passes Visual QA, package all extraction artifacts into a single folder named `docs/captures/<hostname>/` (e.g., `docs/captures/counter-digital.jp/`).
+
+Move the following into that folder:
+- `docs/research/PAGE_TOPOLOGY.md`
+- `docs/research/BEHAVIORS.md`
+- `docs/research/animation-libraries.json`
+- `docs/research/components/` (entire folder)
+- `docs/design-references/` (entire folder, all screenshots)
+
+Final structure:
+
+```
+docs/captures/<hostname>/
+├── PAGE_TOPOLOGY.md
+├── BEHAVIORS.md
+├── animation-libraries.json
+├── components/
+│   ├── Header.spec.md
+│   ├── HeroSection.spec.md
+│   └── ...
+└── design-references/
+    ├── desktop-full.png
+    ├── mobile-full.png
+    └── ...
+```
+
+Report the final folder path to the user when done.
 
 '''
