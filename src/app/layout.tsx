@@ -1,57 +1,49 @@
 import type { Metadata } from "next";
-import { Inter, Noto_Sans_JP, EB_Garamond } from "next/font/google";
+import { Zen_Kaku_Gothic_New, Roboto } from "next/font/google";
 import "./globals.css";
 
-// Display sans — substitute for HelveticaNeueeTextPro (used for big English headlines)
-const inter = Inter({
-  variable: "--font-display",
+const zenKaku = Zen_Kaku_Gothic_New({
+  variable: "--font-zen-kaku",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "700", "900"],
   display: "swap",
 });
 
-// Japanese body type — substitute for Tazugane Gothic HondaMKTA Med
-const notoSansJp = Noto_Sans_JP({
-  variable: "--font-jp",
+const roboto = Roboto({
+  variable: "--font-roboto",
   subsets: ["latin"],
   weight: ["400", "500", "700"],
   display: "swap",
 });
 
-// Serif — substitute for ITCGaramondStd-BkCond (used for "(Service)", "(Promise)" labels)
-const ebGaramond = EB_Garamond({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  title:
-    "COUNTER株式会社 | 埼玉県越谷市のデジタルマーケティングカンパニー",
+  title: "ETOHA LAB l グラフィック・WEBデザイン",
   description:
-    "Webサイト(ホームページ)制作やSEO対策などのデジタルマーケティング課題はCOUNTER株式会社へお問い合わせください。各分野トップクラスのコンサルタント、ディレクターが支援いたします。",
+    "福岡と東京に拠点を置くデザイン会社「ETOHA LAB（えとはラボ）」です。Web・グラフィック・ブランディングなど、グループ内外の多様なクリエイティブを手がけています。",
+  alternates: { canonical: "https://etoha-lab.co.jp/" },
   icons: {
     icon: [
-      { url: "/seo/favicon-32.png", sizes: "32x32" },
-      { url: "/seo/favicon-192.png", sizes: "192x192" },
+      { url: "/assets/seo/favicon.ico", sizes: "32x32" },
+      { url: "/assets/seo/favicon.svg", type: "image/svg+xml" },
     ],
-    apple: "/seo/apple-touch-icon.png",
+    apple: "/assets/seo/apple-touch-icon.png",
   },
   openGraph: {
-    title:
-      "COUNTER株式会社 | 埼玉県越谷市のデジタルマーケティングカンパニー",
+    siteName: "ETOHA LAB",
+    title: "ETOHA LAB l グラフィック・WEBデザイン",
     description:
-      "Webサイト(ホームページ)制作やSEO対策などのデジタルマーケティング課題はCOUNTER株式会社へお問い合わせください。",
+      "福岡と東京に拠点を置くデザイン会社「ETOHA LAB（えとはラボ）」です。Web・グラフィック・ブランディングなど、グループ内外の多様なクリエイティブを手がけています。",
     type: "website",
     locale: "ja_JP",
-    url: "https://counter-digital.jp/",
-    siteName:
-      "COUNTER株式会社 | 埼玉県越谷市のデジタルマーケティングカンパニー",
-    images: [{ url: "/seo/ogp.png" }],
+    url: "https://etoha-lab.co.jp/",
+    images: ["/assets/seo/ogp.png"],
   },
   twitter: {
     card: "summary_large_image",
+    title: "ETOHA LAB l グラフィック・WEBデザイン",
+    description:
+      "福岡と東京に拠点を置くデザイン会社「ETOHA LAB（えとはラボ）」です。",
+    images: ["/assets/seo/ogp.png"],
   },
 };
 
@@ -61,9 +53,9 @@ export default function RootLayout({
   return (
     <html
       lang="ja"
-      className={`${inter.variable} ${notoSansJp.variable} ${ebGaramond.variable} antialiased`}
+      className={`${zenKaku.variable} ${roboto.variable}`}
     >
-      <body className="font-jp text-body bg-white">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }

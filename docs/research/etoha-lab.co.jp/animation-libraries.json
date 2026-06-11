@@ -1,0 +1,79 @@
+{
+  "detected": {
+    "gsap": { "version": "3.12.5" },
+    "scrollTrigger": true,
+    "lenis": true,
+    "locomotiveScroll": false,
+    "framerMotion": false,
+    "aos": false,
+    "swiper": true,
+    "three": false
+  },
+  "cssKeyframes": [
+    {
+      "name": "service_obj_belt-loop",
+      "keyframes": [
+        { "key": "0%", "styles": "transform: translate3d(0px, 0px, 0px);" },
+        { "key": "100%", "styles": "transform: translate3d(-50%, 0px, 0px);" }
+      ]
+    },
+    {
+      "name": "blog_obj_character-in",
+      "keyframes": [
+        { "key": "0%", "styles": "opacity: 0; transform: translate(30%, -70%) scale(1);" },
+        { "key": "60%", "styles": "transform: scale(1.15, 0.85);" },
+        { "key": "65%", "styles": "opacity: 1; transform: translate(0px, 0px);" },
+        { "key": "70%", "styles": "transform: translate(0px, 0px) scale(0.95, 1.05);" },
+        { "key": "90%", "styles": "transform: translate(0px, 0px) scale(1);" },
+        { "key": "100%", "styles": "opacity: 1; transform: translate(0px, 0px) scale(1);" }
+      ]
+    },
+    {
+      "name": "member_obj_character-slide",
+      "keyframes": [
+        { "key": "0%", "styles": "opacity: 0; transform: translateY(-130%);" },
+        { "key": "10%", "styles": "opacity: 1; transform: translateY(-130%);" },
+        { "key": "100%", "styles": "opacity: 1; transform: translateY(0px);" }
+      ]
+    },
+    {
+      "name": "member_list_item-pop_in",
+      "keyframes": [
+        { "key": "0%", "styles": "opacity: 0; transform: scale(0.85);" },
+        { "key": "60%", "styles": "opacity: 1; transform: scale(1.03);" },
+        { "key": "100%", "styles": "opacity: 1; transform: scale(1);" }
+      ]
+    },
+    {
+      "name": "member_list_item_new_icon-fade_in",
+      "keyframes": [
+        { "key": "0%", "styles": "opacity: 0; transform: scale(0.6);" },
+        { "key": "100%", "styles": "opacity: 1; transform: scale(1);" }
+      ]
+    },
+    {
+      "name": "spin",
+      "keyframes": [
+        { "key": "0%", "styles": "transform: rotate(0deg);" },
+        { "key": "100%", "styles": "transform: rotate(360deg);" }
+      ]
+    },
+    {
+      "name": "blink",
+      "keyframes": [
+        { "key": "0%", "styles": "opacity: 0;" },
+        { "key": "50%", "styles": "opacity: 1;" },
+        { "key": "100%", "styles": "opacity: 0;" }
+      ]
+    }
+  ],
+  "calls": [
+    { "method": "to", "target": "#hero_bg", "vars": { "opacity": 0, "duration": 0.3 }, "timestamp": 0, "_note": "hero_bg fades out on scroll-down past hero" },
+    { "method": "set", "target": ".contact_sec__character", "vars": { "xPercent": -50, "yPercent": -75, "opacity": 0, "scaleX": 1, "scaleY": 1 }, "timestamp": 0, "_note": "initial state before entrance" },
+    { "method": "timeline", "target": "(timeline-creator)", "vars": null, "timestamp": 0, "_note": "associated with contact section entrance" },
+    { "method": "to", "target": "#hero_bg", "vars": { "opacity": 1, "duration": 0.3 }, "timestamp": 0, "_note": "hero_bg fades back in on scroll-up to top" },
+    { "method": "to", "target": ".contact_sec__character", "vars": { "opacity": 0, "yPercent": -75, "scaleX": 1, "scaleY": 1, "duration": 0.4, "ease": "power1.in" }, "timestamp": 0, "_note": "exit animation when leaving contact" }
+  ],
+  "_known_unhooked": "Entrance animations on initial load were not captured because the GSAP interceptor was installed after page scripts executed. The captured calls cover scroll-triggered changes only. Per-section builders should rely on CSS keyframes + observed scroll states for entrance animations.",
+  "_service_section_mechanism": "The #service section uses ScrollTrigger-driven pinning. Inner panel pins at viewport top while user scrolls past ~3600px of internal travel. Four equal 700-800px segments toggle .service__nav__list__item._active class via ScrollTrigger callbacks (1: GRAPHIC DESIGN, 2: WEB SITE, 3: PROMOTION, 4: MOVIE). Each .service__contents__card_list__item._01/_02/_03/_04 fades/translates on segment change."
+}

@@ -1,27 +1,10 @@
-import { Header } from "@/components/Header";
-import { HeroSection } from "@/components/HeroSection";
-import { PromiseSection } from "@/components/PromiseSection";
-import { ServiceSection } from "@/components/ServiceSection";
-import { CasestudySection } from "@/components/CasestudySection";
-import { PartnershipSection } from "@/components/PartnershipSection";
-import { VoiceSection } from "@/components/VoiceSection";
-import { MediaSection } from "@/components/MediaSection";
-import { Footer } from "@/components/Footer";
-
 export default function Home() {
   return (
-    <>
-      <Header />
-      <main className="overflow-x-hidden">
-        <HeroSection />
-        <PromiseSection />
-        <ServiceSection />
-        <CasestudySection />
-        <PartnershipSection />
-        <VoiceSection />
-        <MediaSection />
-      </main>
-      <Footer />
-    </>
+    <main className="min-h-screen flex items-center justify-center bg-cream text-body">
+      <div className="text-center font-jp">
+        <h1 className="text-3xl font-bold mb-2 text-brand">ETOHA LAB</h1>
+        <p>Sections under construction.</p>
+      </div>
+    </main>
   );
 }

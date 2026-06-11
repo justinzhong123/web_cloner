@@ -1,40 +1,45 @@
-export type ServiceItem = {
+export type WorkCase = {
   id: string;
-  index: string;
   title: string;
+  titleEn: string;
+  subtitle: string;
+  description?: string;
+  thumbnail: string;
+  tag: string;
+  tags?: string[];
+  href: string;
+  isPickup?: boolean;
+};
+
+export type ServiceTab = {
+  id: "graphic" | "web" | "promotion" | "movie";
+  number: "01" | "02" | "03" | "04";
+  english: string;
+  japanese: string;
   description: string;
-  image: { src: string; alt: string; width: number; height: number };
-  imageSp?: string;
-};
-
-export type CaseStudy = {
-  id: string;
-  title: string;
   image: string;
-  href: string;
-};
-
-export type Partner = {
-  name: string;
-  href: string;
-};
-
-export type VoiceCard = {
-  client: string;
-  quote: string;
-  avatar: string;
-  href: string;
+  tags: string[];
 };
 
 export type BlogPost = {
   date: string;
   title: string;
-  image: string;
   href: string;
+  thumbnail: string;
+  profileImage?: string;
+  author: string;
+};
+
+export type MemberCard = {
+  role: string;
+  name: string;
+  nameJp: string;
+  jobLabel: string;
+  avatar: string;
+  isNew?: boolean;
 };
 
 export type NavItem = {
   label: string;
-  labelHover?: string;
   href: string;
 };
