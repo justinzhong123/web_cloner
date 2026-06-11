@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Zen_Kaku_Gothic_New, Roboto } from "next/font/google";
 import "./globals.css";
+import "./etoha-reset.css";
+import "./etoha-cmn.css";
+import "./etoha-index.css";
 
 const zenKaku = Zen_Kaku_Gothic_New({
   variable: "--font-zen-kaku",
