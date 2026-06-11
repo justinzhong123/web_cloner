@@ -1,10 +1,72 @@
+"use client";
+
+import { useEffect } from "react";
+import Lenis from "lenis";
+import { Header } from "@/components/Header";
+import { HeroSection } from "@/components/HeroSection";
+import { HeroBg } from "@/components/HeroBg";
+import { AboutSection } from "@/components/AboutSection";
+import { WorksSection } from "@/components/WorksSection";
+import { ServiceSection } from "@/components/ServiceSection";
+import { BlogSection } from "@/components/BlogSection";
+import { MemberSection } from "@/components/MemberSection";
+import { ContactSection } from "@/components/ContactSection";
+import { SiteFooter } from "@/components/SiteFooter";
+
 export default function Home() {
+  useEffect(() => {
+    const setVwVh = () => {
+      const root = document.documentElement;
+      root.style.setProperty("--vw", `${root.clientWidth * 0.01}px`);
+      root.style.setProperty("--vh", `${root.clientHeight * 0.01}px`);
+    };
+    setVwVh();
+    window.addEventListener("resize", setVwVh);
+
+    document.documentElement.classList.add("_is_loaded");
+    if (window.innerWidth >= 1440) {
+      document.documentElement.classList.add("_wide_aspect_device");
+    }
+
+    const lenis = new Lenis({
+      duration: 1.0,
+      smoothWheel: true,
+    });
+    document.documentElement.classList.add("lenis");
+
+    let rafId = 0;
+    const raf = (time: number) => {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    };
+    rafId = requestAnimationFrame(raf);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+      window.removeEventListener("resize", setVwVh);
+      document.documentElement.classList.remove(
+        "lenis",
+        "_is_loaded",
+        "_wide_aspect_device",
+      );
+    };
+  }, []);
+
   return (
-    <main className="min-h-screen flex items-center justify-center bg-cream text-body">
-      <div className="text-center font-jp">
-        <h1 className="text-3xl font-bold mb-2 text-brand">ETOHA LAB</h1>
-        <p>Sections under construction.</p>
-      </div>
-    </main>
+    <>
+      <Header />
+      <main>
+        <HeroSection />
+        <HeroBg />
+        <AboutSection />
+        <WorksSection />
+        <ServiceSection />
+        <BlogSection />
+        <MemberSection />
+        <ContactSection />
+      </main>
+      <SiteFooter />
+    </>
   );
 }
