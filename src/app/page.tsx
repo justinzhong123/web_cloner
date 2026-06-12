@@ -17,8 +17,8 @@ export default function Home() {
   useEffect(() => {
     const setVwVh = () => {
       const root = document.documentElement;
-      root.style.setProperty("--vw", `${root.clientWidth * 0.01}px`);
-      root.style.setProperty("--vh", `${root.clientHeight * 0.01}px`);
+      root.style.setProperty("--vw", `${root.clientWidth}`);
+      root.style.setProperty("--vh", `${root.clientHeight}`);
     };
     setVwVh();
     window.addEventListener("resize", setVwVh);
@@ -41,9 +41,25 @@ export default function Home() {
     };
     rafId = requestAnimationFrame(raf);
 
+    const animeObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("_run");
+            animeObserver.unobserve(entry.target);
+          }
+        }
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -10% 0px" },
+    );
+    document
+      .querySelectorAll("._Anime, ._Anime_middle, ._Anime_late")
+      .forEach((el) => animeObserver.observe(el));
+
     return () => {
       cancelAnimationFrame(rafId);
       lenis.destroy();
+      animeObserver.disconnect();
       window.removeEventListener("resize", setVwVh);
       document.documentElement.classList.remove(
         "lenis",

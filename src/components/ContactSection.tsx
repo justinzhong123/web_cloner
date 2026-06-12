@@ -75,7 +75,7 @@ export function ContactSection() {
               </span>
               <span className="contact_sec__balloon__line" />
             </div>
-            <div className="contact_sec__heading" style={{ opacity: 0 }}>
+            <div className="contact_sec__heading">
               <div className="contact_sec__heading__main_text_wrap">
                 <h2 className="contact_sec__heading__main_text cmn_heading__main_text">
                   <img
