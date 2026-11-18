@@ -9,7 +9,7 @@ user-invocable: true
 
 You are about to reverse-engineer and rebuild **$ARGUMENTS** as pixel-perfect clones.
 
-When multiple URLs are provided, process them independently and in parallel where possible, while keeping each site's extraction artifacts isolated in dedicated folders (for example, `docs/research/<hostname>/`).
+When multiple URLs are provided, process them independently and in parallel where possible, while keeping each site's extraction artifacts isolated in dedicated folders (for example, `docs/sites/<hostname>/research/`).
 
 This is not a two-phase process (inspect then build). You are a **foreman walking the job site** — as you inspect each section of the page, you write a detailed specification to a file, then hand that file to a specialist builder agent with everything they need. Extraction and construction happen in parallel, but extraction is meticulous and produces auditable artifacts.
 
@@ -29,7 +29,7 @@ If the user provides additional instructions (specific fidelity level, customiza
 1. **Browser automation is required.** Check for available browser MCP tools (Chrome MCP, Playwright MCP, Browserbase MCP, Puppeteer MCP, etc.). Use whichever is available — if multiple exist, prefer Chrome MCP. If none are detected, ask the user which browser tool they have and how to connect it. This skill cannot work without browser automation.
 2. Parse `$ARGUMENTS` as one or more URLs. Normalize and validate each URL; if any are invalid, ask the user to correct them before proceeding. For each valid URL, verify it is accessible via your browser MCP tool.
 3. Verify the base project builds: `npm run build`. The Next.js + shadcn/ui + Tailwind v4 scaffold should already be in place. If not, tell the user to set it up first.
-4. Create the output directories if they don't exist: `docs/research/`, `docs/research/components/`, `docs/design-references/`, `scripts/`. For multiple clones, also prepare per-site folders like `docs/research/<hostname>/` and `docs/design-references/<hostname>/`.
+4. For each target hostname, create `docs/sites/<hostname>/research/`, `docs/sites/<hostname>/specs/`, and `docs/sites/<hostname>/screenshots/`, plus `scripts/` if needed. For multiple clones, use a separate hostname directory for every site; never mix their artifacts.
 5. When working with multiple sites in one command, optionally confirm whether to run them in parallel (recommended, if resources allow) or sequentially to avoid overload.
 
 ## Guiding Principles
@@ -109,7 +109,7 @@ For scroll-dependent elements:
 
 ### 8. Spec Files Are the Source of Truth
 
-Every component gets a specification file in `docs/research/components/` BEFORE any builder is dispatched. This file is the contract between your extraction work and the builder agent. The builder receives the spec file contents inline in its prompt — the file also persists as an auditable artifact that the user (or you) can review if something looks wrong.
+Every component gets a specification file in `docs/sites/<hostname>/specs/` BEFORE any builder is dispatched. This file is the contract between your extraction work and the builder agent. The builder receives the spec file contents inline in its prompt — the file also persists as an auditable artifact that the user (or you) can review if something looks wrong.
 
 The spec file is not optional. It is not a nice-to-have. If you dispatch a builder without first writing a spec file, you are shipping incomplete instructions based on whatever you can remember from a browser MCP session, and the builder will guess to fill gaps.
 
@@ -123,7 +123,7 @@ Navigate to the target URL with browser MCP.
 
 ### Screenshots
 - Take **full-page screenshots** at desktop (1440px) and mobile (390px) viewports
-- Save to `docs/design-references/` with descriptive names
+- Save to `docs/sites/<hostname>/screenshots/` with descriptive names
 - These are your master reference — builders will receive section-specific crops/screenshots later
 
 ### Global Extraction
@@ -163,7 +163,7 @@ This is a dedicated pass AFTER screenshots and BEFORE anything else. Its purpose
 - Mobile: 390px
 - At each width, note which sections change layout (column → stack, sidebar disappears, etc.) and at approximately which breakpoint the change occurs.
 
-Save all findings to `docs/research/BEHAVIORS.md`. This is your behavior bible — reference it when writing every component spec.
+Save all findings to `docs/sites/<hostname>/research/BEHAVIORS.md`. This is your behavior bible — reference it when writing every component spec.
 
 ### JS Animation Library Extraction
 
@@ -204,7 +204,7 @@ JSON.stringify(
 )
 ```
 
-Merge the result into `docs/research/animation-libraries.json` under a `cssKeyframes` field:
+Merge the result into `docs/sites/<hostname>/research/animation-libraries.json` under a `cssKeyframes` field:
 
 ```json
 {
@@ -253,7 +253,7 @@ const wait = setInterval(() => {
 JSON.stringify(window.__gsapCalls);
 ```
 
-4. **Write the output to `docs/research/animation-libraries.json`** (JSON, not Markdown — it's consumed programmatically when dispatching builders). Merge the detection result from step 1 with the call log from step 3:
+4. **Write the output to `docs/sites/<hostname>/research/animation-libraries.json`** (JSON, not Markdown — it's consumed programmatically when dispatching builders). Merge the detection result from step 1 with the call log from step 3:
 
 ```json
 {
@@ -287,7 +287,7 @@ Map out every distinct section of the page from top to bottom. Give each a worki
 - Dependencies between sections (e.g., a floating nav that overlays everything)
 - **The interaction model** of each section (static, click-driven, scroll-driven, time-driven)
 
-Save this as `docs/research/PAGE_TOPOLOGY.md` — it becomes your assembly blueprint.
+Save this as `docs/sites/<hostname>/research/PAGE_TOPOLOGY.md` — it becomes your assembly blueprint.
 
 ## Phase 2: Foundation Build
 
@@ -348,7 +348,7 @@ This is the core loop. For each section in your page topology (top to bottom), y
 
 For each section, use browser MCP to extract everything:
 
-1. **Screenshot** the section in isolation (scroll to it, screenshot the viewport). Save to `docs/design-references/`.
+1. **Screenshot** the section in isolation (scroll to it, screenshot the viewport). Save to `docs/sites/<hostname>/screenshots/`.
 
 2. **Extract CSS** for every element in the section. Use the extraction script below — don't hand-measure individual properties. Run it once per component container and capture the full output:
 
@@ -415,9 +415,9 @@ Record the diff explicitly: "Property X changes from VALUE_A to VALUE_B, trigger
 
 ### Step 2: Write the Component Spec File
 
-For each section (or sub-component, if you're breaking it up), create a spec file in `docs/research/components/`. This is NOT optional — every builder must have a corresponding spec file.
+For each section (or sub-component, if you're breaking it up), create a spec file in `docs/sites/<hostname>/specs/`. This is NOT optional — every builder must have a corresponding spec file.
 
-**File path:** `docs/research/components/<component-name>.spec.md`
+**File path:** `docs/sites/<hostname>/specs/<component-name>.spec.md`
 
 **Template:**
 
@@ -426,7 +426,7 @@ For each section (or sub-component, if you're breaking it up), create a spec fil
 
 ## Overview
 - **Target file:** `src/components/<ComponentName>.tsx`
-- **Screenshot:** `docs/design-references/<screenshot-name>.png`
+- **Screenshot:** `docs/sites/<hostname>/screenshots/<screenshot-name>.png`
 - **Interaction model:** <static | click-driven | scroll-driven | time-driven>
 
 ## DOM Structure
@@ -498,12 +498,12 @@ Based on complexity, dispatch builder agent(s) in worktree(s):
 
 **What every builder agent receives:**
 - The full contents of its component spec file (inline in the prompt — don't say "go read the spec file")
-- Path to the section screenshot in `docs/design-references/`
+- Path to the section screenshot in `docs/sites/<hostname>/screenshots/`
 - Which shared components to import (`icons.tsx`, `cn()`, shadcn primitives)
 - The target file path (e.g., `src/components/HeroSection.tsx`)
 - Instruction to verify with `npx tsc --noEmit` before finishing
 - For responsive behavior: the specific breakpoint values and what changes
-- **The section's JS animations:** filter `docs/research/animation-libraries.json` down to the `calls` whose `target` matches this section's selectors/elements, and inline that subset directly into the builder prompt (don't say "go read the JSON"). Tell the builder which library to use (e.g., GSAP + ScrollTrigger from `detected`) and to reproduce the exact `vars` — easing, duration, trigger start/end, scrub. If no calls match this section, say so explicitly so the builder doesn't invent animations.
+- **The section's JS animations:** filter `docs/sites/<hostname>/research/animation-libraries.json` down to the `calls` whose `target` matches this section's selectors/elements, and inline that subset directly into the builder prompt (don't say "go read the JSON"). Tell the builder which library to use (e.g., GSAP + ScrollTrigger from `detected`) and to reproduce the exact `vars` — easing, duration, trigger start/end, scrub. If no calls match this section, say so explicitly so the builder doesn't invent animations.
 
 **Don't wait.** As soon as you've dispatched the builder(s) for one section, move to extracting the next section. Builders work in parallel in their worktrees while you continue extraction.
 
@@ -547,7 +547,7 @@ Only after this visual QA pass is the clone complete.
 
 Before dispatching ANY builder agent, verify you can check every box. If you can't, go back and extract more.
 
-- [ ] Spec file written to `docs/research/components/<name>.spec.md` with ALL sections filled
+- [ ] Spec file written to `docs/sites/<hostname>/specs/<name>.spec.md` with ALL sections filled
 - [ ] Every CSS value in the spec is from `getComputedStyle()`, not estimated
 - [ ] Interaction model is identified and documented (static / click / scroll / time)
 - [ ] For stateful components: every state's content and styles are captured
@@ -589,30 +589,24 @@ When done, report:
 
 ## Output Packaging
 
-After the clone passes Visual QA, package all extraction artifacts into a single folder named `docs/captures/<hostname>/` (e.g., `docs/captures/counter-digital.jp/`).
-
-Move the following into that folder:
-- `docs/research/PAGE_TOPOLOGY.md`
-- `docs/research/BEHAVIORS.md`
-- `docs/research/animation-libraries.json`
-- `docs/research/components/` (entire folder)
-- `docs/design-references/` (entire folder, all screenshots)
+All extraction artifacts already live under `docs/sites/<hostname>/`; keep them there after Visual QA. For multiple target URLs, report each hostname's separate directory.
 
 Final structure:
 
-```
-docs/captures/<hostname>/
-├── PAGE_TOPOLOGY.md
-├── BEHAVIORS.md
-├── animation-libraries.json
-├── components/
+```text
+docs/sites/<hostname>/
+├── research/
+│   ├── PAGE_TOPOLOGY.md
+│   ├── BEHAVIORS.md
+│   └── animation-libraries.json
+├── specs/
 │   ├── Header.spec.md
 │   ├── HeroSection.spec.md
 │   └── ...
-└── design-references/
+└── screenshots/
     ├── desktop-full.png
     ├── mobile-full.png
     └── ...
 ```
 
-Report the final folder path to the user when done.
+Report the site folder path to the user when done.
