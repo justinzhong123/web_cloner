@@ -2,8 +2,8 @@
 
 ## 1. Site output hierarchy
 
-- [ ] 1.1 Move reusable inspection guidance to `docs/guides/` and COUNTER research, component specs, and screenshots to `docs/sites/counter-digital.jp/`; verify the original artifact count and content are preserved.
-- [ ] 1.2 Update canonical clone skill paths so each hostname writes research, specs, screenshots, and animation captures beneath `docs/sites/<hostname>/`; verify no active instruction points to the old flat output paths.
+- [x] 1.1 Move reusable inspection guidance to `docs/guides/` and COUNTER research, component specs, and screenshots to `docs/sites/counter-digital.jp/`; verify the original artifact count and content are preserved.
+- [x] 1.2 Update canonical clone skill paths so each hostname writes research, specs, screenshots, and animation captures beneath `docs/sites/<hostname>/`; verify no active instruction points to the old flat output paths.
 - [ ] 1.3 Update `AGENTS.md` and README directory map and links; verify every maintained local link and import resolves.
 
 ## 2. Agent configuration

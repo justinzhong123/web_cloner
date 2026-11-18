@@ -52,8 +52,8 @@ public/
   videos/           # Downloaded videos from target site
   seo/              # Favicons, OG images, webmanifest
 docs/
-  research/         # Inspection output (design tokens, components, layout)
-  design-references/ # Screenshots and visual references
+  guides/           # Reusable inspection guidance
+  sites/            # Per-hostname research, specs, and screenshots
 scripts/            # Asset download scripts
 ```
 
@@ -62,4 +62,4 @@ scripts/            # Asset download scripts
 - After editing `AGENTS.md`, run `bash scripts/sync-agent-rules.sh` to regenerate platform-specific instruction files.
 - After editing `.claude/skills/clone-website/SKILL.md`, run `node scripts/sync-skills.mjs` to regenerate the skill for all platforms.
 
-@docs/research/INSPECTION_GUIDE.md
+@docs/guides/INSPECTION_GUIDE.md

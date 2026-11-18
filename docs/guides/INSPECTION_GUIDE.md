@@ -72,7 +72,7 @@ For each distinct UI component, document:
 
 ## Phase 5: Documentation Output
 
-After inspection, create these files in `docs/research/`:
+After inspection, create these files in `docs/sites/<hostname>/research/`:
 1. `DESIGN_TOKENS.md` — All extracted colors, typography, spacing
 2. `COMPONENT_INVENTORY.md` — Every component with structure notes
 3. `LAYOUT_ARCHITECTURE.md` — Page layouts, grid system, responsive behavior
