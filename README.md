@@ -4,7 +4,7 @@
 
 A reusable template for reverse-engineering any website into a clean, modern Next.js codebase using AI coding agents — **with runtime JS animation interception** so GSAP, ScrollTrigger, Lenis, and friends survive the clone.
 
-**Recommended: [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with Opus 4.7 for best results** — but works with a variety of AI coding agents.
+The maintained agent integrations are Claude Code and Codex. Other agents can use the generic guidance in `AGENTS.md`.
 
 Point it at a URL, run `/clone-website`, and your AI agent will inspect the site, extract design tokens and assets, **hook the page's animation libraries at runtime to capture every tween's target/easing/duration/trigger**, write component specs, and dispatch parallel builders to reconstruct every section.
 
@@ -18,13 +18,13 @@ This template intercepts the animation libraries **at runtime, before the page's
 - **Hooks GSAP** via `addInitScript` and wraps `gsap.to/from/fromTo/set/timeline` and `ScrollTrigger.create` before the page boots
 - **Captures `@keyframes`** from every stylesheet in one pass
 - **Replays the page** (reload + full scroll) so every entrance and scroll-triggered tween fires into the interceptor
-- **Serializes everything** to `docs/research/animation-libraries.json` — exact targets, `vars` (easing, duration, scrub, trigger start/end), and timestamps
+- **Serializes everything** to `docs/sites/<hostname>/research/animation-libraries.json` — exact targets, `vars` (easing, duration, scrub, trigger start/end), and timestamps
 
 When builders are dispatched, the orchestrator filters that JSON down to the calls matching each section's selectors and inlines them in the prompt — so the builder reproduces the exact `ease: "power3.out"`, the exact `start: "top 80%"`, the exact `scrub: true`, not a guess.
 
 ## Demo
 
-[![Watch the demo](docs/design-references/comparison.png)](https://youtu.be/O669pVZ_qr0)
+[![Watch the demo](docs/sites/counter-digital.jp/screenshots/comparison.png)](https://youtu.be/O669pVZ_qr0)
 
 > Click the image above to watch the full demo on YouTube.
 
@@ -65,25 +65,14 @@ When builders are dispatched, the orchestrator filters that JSON down to the cal
    ```
 6. **Customize** (optional) — after the base clone is built, modify as needed
 
-> Using a different agent? Open `AGENTS.md` for project instructions — most agents pick it up automatically.
+> Using Codex? Run the same `/clone-website` skill. Other agents can read `AGENTS.md` and the canonical skill.
 
 ## Supported Platforms
 
-| Agent                                                         | Status                     |
-| ------------------------------------------------------------- | -------------------------- |
-| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | **Recommended** — Opus 4.7 |
-| [Codex CLI](https://github.com/openai/codex)                  | Supported                  |
-| [OpenCode](https://opencode.ai/)                              | Supported                  |
-| [GitHub Copilot](https://github.com/features/copilot)         | Supported                  |
-| [Cursor](https://cursor.com/)                                 | Supported                  |
-| [Windsurf](https://codeium.com/windsurf)                      | Supported                  |
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli)     | Supported                  |
-| [Cline](https://github.com/cline/cline)                       | Supported                  |
-| [Roo Code](https://github.com/RooCodeInc/Roo-Code)            | Supported                  |
-| [Continue](https://continue.dev/)                             | Supported                  |
-| [Amazon Q](https://aws.amazon.com/q/developer/)               | Supported                  |
-| [Augment Code](https://www.augmentcode.com/)                  | Supported                  |
-| [Aider](https://aider.chat/)                                  | Supported                  |
+| Agent | Integration |
+| ----- | ----------- |
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Canonical `.claude/skills/clone-website/SKILL.md` and `CLAUDE.md` |
+| [Codex CLI](https://github.com/openai/codex) | Generated `.codex/skills/clone-website/SKILL.md` and `AGENTS.md` |
 
 ## Prerequisites
 
@@ -103,9 +92,9 @@ When builders are dispatched, the orchestrator filters that JSON down to the cal
 The `/clone-website` skill runs a multi-phase pipeline:
 
 1. **Reconnaissance** — screenshots, design token extraction, interaction sweep (scroll, click, hover, responsive)
-2. **JS animation interception** — fingerprints loaded libraries, dumps every `@keyframes` rule, then injects a GSAP/ScrollTrigger hook with `addInitScript` so a single reload + full scroll captures every tween's `target`, `vars`, and timestamp into `docs/research/animation-libraries.json`
+2. **JS animation interception** — fingerprints loaded libraries, dumps every `@keyframes` rule, then injects a GSAP/ScrollTrigger hook with `addInitScript` so a single reload + full scroll captures every tween's `target`, `vars`, and timestamp into `docs/sites/<hostname>/research/animation-libraries.json`
 3. **Foundation** — updates fonts, colors, globals, downloads all assets
-4. **Component Specs** — writes detailed spec files (`docs/research/components/`) with exact computed CSS values, states, behaviors, and content
+4. **Component Specs** — writes detailed spec files (`docs/sites/<hostname>/specs/`) with exact computed CSS values, states, behaviors, and content
 5. **Parallel Build** — dispatches builder agents in git worktrees, one per section/component, with each section's matching animation calls inlined into the prompt
 6. **Assembly & QA** — merges worktrees, wires up the page, runs visual diff against the original
 
@@ -179,18 +168,19 @@ public/
   videos/           # Downloaded videos from target
   seo/              # Favicons, OG images
 docs/
-  research/                    # Extraction output & component specs
-    animation-libraries.json   # Runtime-captured GSAP/ScrollTrigger calls + @keyframes
-    BEHAVIORS.md               # Interaction sweep findings
-    PAGE_TOPOLOGY.md           # Section map & interaction models
-    components/                # Per-component spec files
-  design-references/           # Screenshots
+  guides/                      # Reusable inspection guidance
+  sites/<hostname>/            # Output for one target website
+    research/                  # Findings and animation captures
+    specs/                     # Per-component specifications
+    screenshots/               # Visual references and comparisons
+openspec/                      # Product and workflow specs; change history
+.agents/skills/                # OpenSpec workflow skills
+.claude/skills/clone-website/   # Canonical clone workflow
+.codex/skills/clone-website/    # Generated Codex copy
 scripts/
-  sync-agent-rules.sh  # Regenerate agent instruction files
-  sync-skills.mjs      # Regenerate /clone-website for all platforms
+  sync-skills.mjs      # Regenerate the Codex clone skill
 AGENTS.md           # Agent instructions (single source of truth)
 CLAUDE.md           # Claude Code config (imports AGENTS.md)
-GEMINI.md           # Gemini CLI config (imports AGENTS.md)
 ```
 
 ## Commands
@@ -210,16 +200,15 @@ docker compose up app --build # build and run the app
 docker compose up dev --build # run the app in dev mode on port 3001
 ```
 
-## Updating for Other Platforms
+## Updating Agent Guidance
 
-Two source-of-truth files power all platform support. Edit the source, then run the sync script:
+`AGENTS.md` is the project guidance source. `CLAUDE.md` imports it, and Codex reads it directly. The canonical clone workflow is `.claude/skills/clone-website/SKILL.md`; regenerate its Codex copy after edits:
 
-| What                   | Source of truth                         | Sync command                       |
-| ---------------------- | --------------------------------------- | ---------------------------------- |
-| Project instructions   | `AGENTS.md`                             | `bash scripts/sync-agent-rules.sh` |
-| `/clone-website` skill | `.claude/skills/clone-website/SKILL.md` | `node scripts/sync-skills.mjs`     |
+```bash
+node scripts/sync-skills.mjs
+```
 
-Each script regenerates the platform-specific copies automatically. Agents that read the source files natively need no regeneration.
+`.agents/skills/` contains OpenSpec skills and is managed by OpenSpec. `docs/guides/` contains reusable guidance; generated clone outputs belong under `docs/sites/<hostname>/`. The existing COUNTER example is in `docs/sites/counter-digital.jp/`.
 
 
 ## Star History

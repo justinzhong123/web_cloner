@@ -52,14 +52,14 @@ public/
   videos/           # Downloaded videos from target site
   seo/              # Favicons, OG images, webmanifest
 docs/
-  research/         # Inspection output (design tokens, components, layout)
-  design-references/ # Screenshots and visual references
+  guides/           # Reusable inspection guidance
+  sites/            # Per-hostname research, specs, and screenshots
 scripts/            # Asset download scripts
 ```
 
 ## MOST IMPORTANT NOTES
 - When launching Claude Code agent teams, ALWAYS have each teammate work in their own worktree branch and merge everyone's work at the end, resolving any merge conflicts smartly since you are basically serving the orchestrator role and have full context to our goals, work given, work achieved, and desired outcomes.
-- After editing `AGENTS.md`, run `bash scripts/sync-agent-rules.sh` to regenerate platform-specific instruction files.
-- After editing `.claude/skills/clone-website/SKILL.md`, run `node scripts/sync-skills.mjs` to regenerate the skill for all platforms.
+- `AGENTS.md` is the canonical project guidance; `CLAUDE.md` imports it directly and Codex reads it directly.
+- After editing `.claude/skills/clone-website/SKILL.md`, run `node scripts/sync-skills.mjs` to regenerate the Codex skill copy.
 
-@docs/research/INSPECTION_GUIDE.md
+@docs/guides/INSPECTION_GUIDE.md
