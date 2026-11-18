@@ -2,7 +2,7 @@
 
 ## Overview
 - **Target file:** `src/components/HeroSection.tsx`
-- **Screenshot:** `docs/design-references/desktop-section-hero.png`
+- **Screenshot:** `docs/sites/counter-digital.jp/screenshots/desktop-section-hero.png`
 - **Interaction model:** static + a small entrance animation (fade-up on load)
 
 ## DOM Structure

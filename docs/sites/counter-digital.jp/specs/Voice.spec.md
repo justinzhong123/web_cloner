@@ -2,7 +2,7 @@
 
 ## Overview
 - **Target file:** `src/components/VoiceSection.tsx`
-- **Screenshot:** `docs/design-references/desktop-section-voice.png`
+- **Screenshot:** `docs/sites/counter-digital.jp/screenshots/desktop-section-voice.png`
 - **Interaction model:** static + entrance reveal
 
 ## DOM Structure

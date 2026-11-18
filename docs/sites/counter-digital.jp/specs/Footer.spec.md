@@ -2,7 +2,7 @@
 
 ## Overview
 - **Target file:** `src/components/Footer.tsx`
-- **Screenshot:** `docs/design-references/desktop-section-footer.png`
+- **Screenshot:** `docs/sites/counter-digital.jp/screenshots/desktop-section-footer.png`
 - **Interaction model:** static
 
 ## DOM Structure

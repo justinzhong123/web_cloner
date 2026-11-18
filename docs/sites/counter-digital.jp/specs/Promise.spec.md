@@ -2,7 +2,7 @@
 
 ## Overview
 - **Target file:** `src/components/PromiseSection.tsx`
-- **Screenshot:** `docs/design-references/desktop-section-promise.png`
+- **Screenshot:** `docs/sites/counter-digital.jp/screenshots/desktop-section-promise.png`
 - **Interaction model:** scroll-driven entrance reveals + a horizontal infinite-marquee at top
 
 ## DOM Structure

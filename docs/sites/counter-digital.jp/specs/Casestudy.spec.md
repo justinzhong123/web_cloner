@@ -2,7 +2,7 @@
 
 ## Overview
 - **Target file:** `src/components/CasestudySection.tsx`
-- **Screenshot:** `docs/design-references/desktop-section-casestudy.png`
+- **Screenshot:** `docs/sites/counter-digital.jp/screenshots/desktop-section-casestudy.png`
 - **Interaction model:** static + scroll-reveal entrance; horizontal-scrollable card list on smaller screens
 
 ## DOM Structure

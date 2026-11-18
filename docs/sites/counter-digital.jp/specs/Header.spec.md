@@ -2,7 +2,7 @@
 
 ## Overview
 - **Target file:** `src/components/Header.tsx`
-- **Screenshot:** `docs/design-references/desktop-section-hero.png` (top 100px)
+- **Screenshot:** `docs/sites/counter-digital.jp/screenshots/desktop-section-hero.png` (top 100px)
 - **Interaction model:** static (no scroll behavior — header stays transparent throughout)
 
 ## DOM Structure

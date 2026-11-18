@@ -2,7 +2,7 @@
 
 ## Overview
 - **Target file:** `src/components/MediaSection.tsx`
-- **Screenshot:** `docs/design-references/desktop-section-media.png`
+- **Screenshot:** `docs/sites/counter-digital.jp/screenshots/desktop-section-media.png`
 - **Interaction model:** static; decorative semicircle in upper-left
 
 ## DOM Structure

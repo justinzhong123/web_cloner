@@ -2,7 +2,7 @@
 
 ## Overview
 - **Target file:** `src/components/ServiceSection.tsx`
-- **Screenshot:** `docs/design-references/desktop-section-service-top.png` + `desktop-section-service-items.png`
+- **Screenshot:** `docs/sites/counter-digital.jp/screenshots/desktop-section-service-top.png` + `desktop-section-service-items.png`
 - **Interaction model:** scroll-driven entrance reveals on items; sticky-feeling head with vertical type
 
 ## DOM Structure
