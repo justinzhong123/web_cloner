@@ -9,7 +9,7 @@ user-invocable: true
 
 You are about to reverse-engineer and rebuild **$ARGUMENTS** as pixel-perfect clones.
 
-When multiple URLs are provided, process them independently and in parallel where possible, while keeping each site's extraction artifacts isolated in dedicated folders (for example, `docs/sites/<hostname>/research/`).
+When multiple URLs are provided, process them independently and in parallel where possible, with each site in its own `export/<site-id>/` project. Within that project, keep extraction artifacts in `docs/sites/<hostname>/`.
 
 This is not a two-phase process (inspect then build). You are a **foreman walking the job site** — as you inspect each section of the page, you write a detailed specification to a file, then hand that file to a specialist builder agent with everything they need. Extraction and construction happen in parallel, but extraction is meticulous and produces auditable artifacts.
 
@@ -28,9 +28,10 @@ If the user provides additional instructions (specific fidelity level, customiza
 
 1. **Browser automation is required.** Check for available browser MCP tools (Chrome MCP, Playwright MCP, Browserbase MCP, Puppeteer MCP, etc.). Use whichever is available — if multiple exist, prefer Chrome MCP. If none are detected, ask the user which browser tool they have and how to connect it. This skill cannot work without browser automation.
 2. Parse `$ARGUMENTS` as one or more URLs. Normalize and validate each URL; if any are invalid, ask the user to correct them before proceeding. For each valid URL, verify it is accessible via your browser MCP tool.
-3. Verify the base project builds: `npm run build`. The Next.js + shadcn/ui + Tailwind v4 scaffold should already be in place. If not, tell the user to set it up first.
-4. For each target hostname, create `docs/sites/<hostname>/research/`, `docs/sites/<hostname>/specs/`, and `docs/sites/<hostname>/screenshots/`, plus `scripts/` if needed. For multiple clones, use a separate hostname directory for every site; never mix their artifacts.
-5. When working with multiple sites in one command, optionally confirm whether to run them in parallel (recommended, if resources allow) or sequentially to avoid overload.
+3. **Initialize an export project for each URL.** Run `node scripts/init-export-project.mjs <url>` from the template root. If `export/<site-id>/` already exists, preserve it and report the conflict; use `--force` only when the user explicitly authorizes replacing that project.
+4. **Set the working directory to the export project.** All subsequent file writes, builds, and commands MUST run from `export/<site-id>/`. Within it, use `docs/sites/<hostname>/research/`, `docs/sites/<hostname>/specs/`, and `docs/sites/<hostname>/screenshots/` for extraction artifacts.
+5. Verify the export project builds with `npm run build` from its own directory.
+6. When working with multiple sites in one command, optionally confirm whether to run them in parallel (recommended, if resources allow) or sequentially to avoid overload.
 
 ## Guiding Principles
 
@@ -589,12 +590,16 @@ When done, report:
 
 ## Output Packaging
 
-All extraction artifacts already live under `docs/sites/<hostname>/`; keep them there after Visual QA. For multiple target URLs, report each hostname's separate directory.
+All extraction artifacts already live under `export/<site-id>/docs/sites/<hostname>/`; keep them there after Visual QA. For multiple target URLs, report each separate export project.
 
 Final structure:
 
 ```text
-docs/sites/<hostname>/
+export/<site-id>/
+├── src/
+├── public/
+├── package.json
+└── docs/sites/<hostname>/
 ├── research/
 │   ├── PAGE_TOPOLOGY.md
 │   ├── BEHAVIORS.md
@@ -609,4 +614,10 @@ docs/sites/<hostname>/
     └── ...
 ```
 
-Report the site folder path to the user when done.
+Report the export project path (`export/<site-id>/`) to the user when done, along with the commands to run it:
+
+```bash
+cd export/<site-id>
+npm install
+npm run dev
+```

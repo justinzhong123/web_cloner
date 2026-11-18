@@ -9,6 +9,9 @@ out/
 build/
 dist/
 
+# Export projects (generated cloned sites — not committed)
+export/
+
 # Environment
 .env
 .env.local

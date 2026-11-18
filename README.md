@@ -154,43 +154,106 @@ If no JS animation library is detected, the file is still written with `detected
 
 ## Project Structure
 
+### Template Root (Generator)
+
+This is the template you clone and run `/clone-website` from. It contains the generator scaffolding:
+
 ```
 src/
-  app/              # Next.js routes
-  components/       # React components
+  app/              # Next.js routes (template)
+  components/       # React components (template)
     ui/             # shadcn/ui primitives
-    icons.tsx       # Extracted SVG icons
+    icons.tsx       # Extracted SVG icons (template)
   lib/utils.ts      # cn() utility
   types/            # TypeScript interfaces
   hooks/            # Custom React hooks
 public/
-  images/           # Downloaded images from target
-  videos/           # Downloaded videos from target
-  seo/              # Favicons, OG images
+  images/           # Downloaded images from target (template)
+  videos/           # Downloaded videos from target (template)
+  seo/              # Favicons, OG images (template)
 docs/
   guides/                      # Reusable inspection guidance
-  sites/<hostname>/            # Output for one target website
-    research/                  # Findings and animation captures
-    specs/                     # Per-component specifications
-    screenshots/               # Visual references and comparisons
+  sites/<hostname>/            # Existing site captures
 openspec/                      # Product and workflow specs; change history
 .agents/skills/                # OpenSpec workflow skills
 .claude/skills/clone-website/   # Canonical clone workflow
 .codex/skills/clone-website/    # Generated Codex copy
 scripts/
-  sync-skills.mjs      # Regenerate the Codex clone skill
+  init-export-project.mjs      # Initialize an independent export project
+  sync-skills.mjs              # Regenerate the Codex clone skill
 AGENTS.md           # Agent instructions (single source of truth)
 CLAUDE.md           # Claude Code config (imports AGENTS.md)
 ```
 
+### Export Projects (Generated Clones)
+
+Each cloned website becomes an **independent Next.js project** under `export/<site-id>/`. These are complete, self-contained applications that can be moved, deployed, or archived independently.
+
+```
+export/
+  example.com/                    # Site ID derived from URL
+    src/
+      app/                        # Next.js routes (cloned site)
+      components/                 # React components (cloned site)
+        ui/                       # shadcn/ui primitives
+        icons.tsx                 # Extracted SVG icons
+      lib/utils.ts                # cn() utility
+      types/                      # TypeScript interfaces
+      hooks/                      # Custom React hooks
+    public/
+      images/                     # Downloaded images
+      videos/                     # Downloaded videos
+      seo/                        # Favicons, OG images
+    docs/
+      sites/example.com/
+        research/                 # Findings and animation captures
+        specs/                    # Per-component specifications
+        screenshots/              # Visual references and comparisons
+    scripts/                      # Optional site asset scripts
+    package.json                  # Independent package.json
+    package-lock.json
+    tsconfig.json
+    next.config.ts
+    postcss.config.mjs
+    eslint.config.mjs
+    components.json
+    README.md                     # Site-specific documentation
+    export-manifest.json          # Metadata (source URL, created date, etc.)
+    .gitignore
+  another-site.com--products/     # Another cloned site (different path)
+```
+
+**Key points:**
+- Each `export/<site-id>/` is a complete Next.js project — run `npm install && npm run dev` inside it
+- The template root (`src/`, `public/`, `docs/` at top level) is **only used as a generator** — new clones don't modify it
+- Multiple clones are fully isolated — no shared files, no conflicts
+- Export projects are **not committed to git** (see `.gitignore`) — they are build artifacts
+- To deliver a clone, zip or copy the entire `export/<site-id>/` folder
+
 ## Commands
 
+### Template Root (Generator)
+
 ```bash
-npm run dev    # Start dev server
-npm run build  # Production build
+npm run dev    # Start dev server (template)
+npm run build  # Production build (template)
 npm run lint   # ESLint check
 npm run typecheck # TypeScript check
 npm run check  # Run lint + typecheck + build
+```
+
+### Export Projects (Cloned Sites)
+
+After running `/clone-website`, each site is in `export/<site-id>/`:
+
+```bash
+cd export/<site-id>
+npm install           # Install dependencies (first time only)
+npm run dev           # Start dev server at localhost:3000
+npm run build         # Production build
+npm run lint          # ESLint check
+npm run typecheck     # TypeScript check
+npm run check         # Run lint + typecheck + build
 ```
 
 ### If using docker
@@ -200,6 +263,44 @@ docker compose up app --build # build and run the app
 docker compose up dev --build # run the app in dev mode on port 3001
 ```
 
+## Export Workflow
+
+When you run `/clone-website <url1> [<url2> ...]`:
+
+1. **Site ID generation** — Each URL is normalized to a filesystem-safe site ID:
+   - `https://example.com` → `example.com`
+   - `https://example.com/products/item` → `example.com--products-item`
+   - `https://example.com/search?q=test` → `example.com--search--<hash>`
+
+2. **Conflict detection** — If `export/<site-id>/` already exists, the skill reports the conflict and asks before overwriting. Use `--force` to override.
+
+3. **Project initialization** — A complete Next.js project is created at `export/<site-id>/` with all config, source files, and directory structure copied from the template.
+
+4. **Cloning happens inside the export project** — All extraction, building, and verification runs from within `export/<site-id>/`. The template root is untouched.
+
+5. **Verification** — After cloning, `npm run check` runs inside the export project to verify it builds cleanly.
+
+6. **Reporting** — The skill reports the export project path and startup commands.
+
+### Moving/Delivering a Clone
+
+Each export project is self-contained. To share or deploy:
+
+```bash
+# Copy to another location
+cp -r export/example.com /path/to/destination/
+
+# Or zip for delivery
+zip -r example.com-clone.zip export/example.com
+
+# Recipient just needs to:
+cd example.com
+npm install
+npm run dev
+```
+
+No template dependency — the export project has everything it needs.
+
 ## Updating Agent Guidance
 
 `AGENTS.md` is the project guidance source. `CLAUDE.md` imports it, and Codex reads it directly. The canonical clone workflow is `.claude/skills/clone-website/SKILL.md`; regenerate its Codex copy after edits:
@@ -208,7 +309,7 @@ docker compose up dev --build # run the app in dev mode on port 3001
 node scripts/sync-skills.mjs
 ```
 
-`.agents/skills/` contains OpenSpec skills and is managed by OpenSpec. `docs/guides/` contains reusable guidance; generated clone outputs belong under `docs/sites/<hostname>/`. The existing COUNTER example is in `docs/sites/counter-digital.jp/`.
+`.agents/skills/` contains OpenSpec skills and is managed by OpenSpec. `docs/guides/` contains reusable guidance. New clones belong under `export/<site-id>/`, with captures at `export/<site-id>/docs/sites/<hostname>/`. The existing COUNTER example remains in `docs/sites/counter-digital.jp/`.
 
 
 ## Star History
