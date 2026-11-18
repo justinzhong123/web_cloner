@@ -2,107 +2,107 @@
 
 <a href="https://github.com/JCodesMore/ai-website-cloner-template/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License" /></a> <a href="https://github.com/JCodesMore/ai-website-cloner-template/stargazers"><img src="https://img.shields.io/github/stars/JCodesMore/ai-website-cloner-template?style=flat" alt="Stars" /></a> <a href="https://discord.gg/hrTSX5yTpB"><img src="https://img.shields.io/discord/1400896964597383279?label=discord" alt="Discord" /></a>
 
-A reusable template for reverse-engineering any website into a clean, modern Next.js codebase using AI coding agents — **with runtime JS animation interception** so GSAP, ScrollTrigger, Lenis, and friends survive the clone.
+這是一個可重複使用的專案範本，能透過 AI 程式開發代理（AI coding agents）將任何網站逆向工程並重建為乾淨、現代化的 Next.js 程式碼庫 —— **支援執行階段（runtime）JS 動畫攔截**，讓 GSAP、ScrollTrigger、Lenis 等動態效果在複製後依然完整保留。
 
-The maintained agent integrations are Claude Code and Codex. Other agents can use the generic guidance in `AGENTS.md`.
+目前主要維護的代理整合為 Claude Code 與 Codex；其他代理工具則可參考 `AGENTS.md` 中的通用指引。
 
-Point it at a URL, run `/clone-website`, and your AI agent will inspect the site, extract design tokens and assets, **hook the page's animation libraries at runtime to capture every tween's target/easing/duration/trigger**, write component specs, and dispatch parallel builders to reconstruct every section.
+只要指定目標網址並執行 `/clone-website`，AI 代理就會自動檢視網站、擷取設計 Token 與靜態資源、**在執行階段攔截頁面的動畫函式庫以記錄每個 Tween 的目標、緩動（easing）、持續時間與觸發條件**、撰寫元件規格，並平行派發建置代理（builder agents）還原每個區塊。
 
-## What Makes This Version Different
+## 本版本的獨特之處
 
-Most reverse-engineering pipelines stop at CSS. They get the colors, the spacing, the fonts — and ship a clone that feels dead because every scroll-triggered fade, parallax, and pinned section is gone. That motion lives in compiled JS bundles, not stylesheets, so static inspection can't see it.
+多數網站逆向工程流程只停留在 CSS 層面。它們能取得色彩、間距與字體 —— 但產出的複製網站往往顯得生硬死板，因為所有隨捲動觸發的淡入、視差（parallax）與固定區塊（pinned section）都消失了。這些動態邏輯存在於編譯後的 JS 套件而非樣式表中，靜態檢查無法看見。
 
-This template intercepts the animation libraries **at runtime, before the page's own code runs**, and records every call:
+本範本會**在頁面自身程式碼執行前，於執行階段攔截動畫函式庫**並記錄每一次呼叫：
 
-- **Detects** which libraries are loaded — GSAP, ScrollTrigger, Lenis, Locomotive Scroll, Framer Motion, AOS, Swiper, Three.js
-- **Hooks GSAP** via `addInitScript` and wraps `gsap.to/from/fromTo/set/timeline` and `ScrollTrigger.create` before the page boots
-- **Captures `@keyframes`** from every stylesheet in one pass
-- **Replays the page** (reload + full scroll) so every entrance and scroll-triggered tween fires into the interceptor
-- **Serializes everything** to `docs/sites/<hostname>/research/animation-libraries.json` — exact targets, `vars` (easing, duration, scrub, trigger start/end), and timestamps
+- **偵測**頁面載入的動畫函式庫 —— GSAP、ScrollTrigger、Lenis、Locomotive Scroll、Framer Motion、AOS、Swiper、Three.js
+- **透過 `addInitScript` 攔截 GSAP**，在頁面啟動前包裝 `gsap.to/from/fromTo/set/timeline` 與 `ScrollTrigger.create`
+- **單次掃描擷取**所有樣式表中的 `@keyframes` 規則
+- **重播頁面**（重新載入並完整捲動），讓所有進場動畫與捲動觸發的 Tween 都寫入攔截器
+- **完整序列化輸出**至 `docs/sites/<hostname>/research/animation-libraries.json` —— 包含精確目標、`vars`（緩動、持續時間、scrub、觸發起迄點）以及時間戳記
 
-When builders are dispatched, the orchestrator filters that JSON down to the calls matching each section's selectors and inlines them in the prompt — so the builder reproduces the exact `ease: "power3.out"`, the exact `start: "top 80%"`, the exact `scrub: true`, not a guess.
+派發建置代理時，協調器（orchestrator）會將該 JSON 依各區塊的選擇器過濾，並直接內嵌進提示詞（prompt）中 —— 因此建置代理能精確重現 `ease: "power3.out"`、`start: "top 80%"`、`scrub: true`，而不必靠猜測。
 
-## Demo
+## 示範影片
 
-[![Watch the demo](docs/sites/counter-digital.jp/screenshots/comparison.png)](https://youtu.be/O669pVZ_qr0)
+[![觀看示範影片](docs/sites/counter-digital.jp/screenshots/comparison.png)](https://youtu.be/O669pVZ_qr0)
 
-> Click the image above to watch the full demo on YouTube.
+> 點擊上方圖片前往 YouTube 觀看完整示範。
 
-## Quick Start
+## 快速開始
 
-> **Important:** Start by making your own copy with GitHub's **Use this template** button. Do not clone this template repository directly for your website project, and do not open pull requests here with your generated website.
+> **重要提醒：** 請先使用 GitHub 上的 **Use this template** 按鈕建立屬於你自己的複製專案。請勿直接 clone 此範本儲存庫來製作你的網站專案，也不要將產生的網站透過 Pull Request 送回此範本儲存庫。
 
-1. **Create your own repository from this template**
+1. **從此範本建立你自己的儲存庫**
 
-   On the GitHub page for this project, click **Use this template**, then click **Create a new repository**.
+   在此專案的 GitHub 頁面上，點擊 **Use this template**，接著點擊 **Create a new repository**。
 
-   Give your new repository a name, choose whether it should be public or private, then click **Create repository**. If GitHub shows an **Include all branches** option, you can leave it off.
+   為新儲存庫命名、選擇公開（Public）或私人（Private），然後點擊 **Create repository**。如果 GitHub 顯示 **Include all branches** 選項，可以不用勾選。
 
-   This gives you your own separate project to work in, so your website changes stay in your account instead of coming back to the main template.
+   這樣你就能在獨立的專案中作業，網站的修改會留在你自己的帳號下，而不會回到主範本。
 
-2. **Open your new repository on your computer**
+2. **在你的電腦上開啟新儲存庫**
 
-   After GitHub creates your copy, open that new repository. Click **Code** and open or clone your new repository with your preferred coding tool.
+   GitHub 建立完成後，開啟該新儲存庫。點擊 **Code**，並使用你慣用的開發工具開啟或 clone 該儲存庫。
 
-   If you use the terminal, the command will look like this:
+   如果使用終端機，指令會像這樣：
 
    ```bash
    git clone https://github.com/YOUR-USERNAME/YOUR-NEW-REPOSITORY.git
    cd YOUR-NEW-REPOSITORY
    ```
 
-3. **Install dependencies**
+3. **安裝相依套件**
    ```bash
    npm install
    ```
-4. **Start your AI agent** — Claude Code recommended:
+4. **啟動 AI 代理** —— 建議使用 Claude Code：
    ```bash
    claude --chrome
    ```
-5. **Run the skill**:
+5. **執行 Skill**：
    ```
    /clone-website <target-url1> [<target-url2> ...]
    ```
-6. **Customize** (optional) — after the base clone is built, modify as needed
+6. **客製化調整**（選用）—— 在基礎複製網站建置完成後，依需求自由修改。
 
-> Using Codex? Run the same `/clone-website` skill. Other agents can read `AGENTS.md` and the canonical skill.
+> 使用 Codex 嗎？直接執行同樣的 `/clone-website` skill 即可。其他代理工具則可讀取 `AGENTS.md` 與主工作流程 skill。
 
-## Supported Platforms
+## 支援平台
 
-| Agent | Integration |
-| ----- | ----------- |
-| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Canonical `.claude/skills/clone-website/SKILL.md` and `CLAUDE.md` |
-| [Codex CLI](https://github.com/openai/codex) | Generated `.codex/skills/clone-website/SKILL.md` and `AGENTS.md` |
+| 代理工具 | 整合方式 |
+| -------- | -------- |
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | 正式規格 `.claude/skills/clone-website/SKILL.md` 與 `CLAUDE.md` |
+| [Codex CLI](https://github.com/openai/codex) | 由腳本同步產生的 `.codex/skills/clone-website/SKILL.md` 與 `AGENTS.md` |
 
-## Prerequisites
+## 前置需求
 
 - [Node.js](https://nodejs.org/) 24+
-- A browser-automation MCP — **Chrome MCP recommended** (required for the runtime animation hook). Playwright MCP, Browserbase, or Puppeteer MCP also work as long as they expose an `addInitScript`-equivalent that runs before page scripts.
-- An AI coding agent (see [Supported Platforms](#supported-platforms))
+- 瀏覽器自動化 MCP —— **建議使用 Chrome MCP**（執行階段動畫攔截 Hook 所需）。Playwright MCP、Browserbase 或 Puppeteer MCP 只要提供類似 `addInitScript`、可在頁面腳本執行前注入的功能亦可運作。
+- AI 程式開發代理（見[支援平台](#支援平台)）
 
-## Tech Stack
+## 技術堆疊
 
-- **Next.js 16** — App Router, React 19, TypeScript strict
-- **shadcn/ui** — Radix primitives + Tailwind CSS v4
-- **Tailwind CSS v4** — oklch design tokens
-- **Lucide React** — default icons (replaced by extracted SVGs during cloning)
+- **Next.js 16** — App Router、React 19、嚴格模式 TypeScript
+- **shadcn/ui** — Radix 原語（primitives）+ Tailwind CSS v4
+- **Tailwind CSS v4** — oklch 設計 Token
+- **Lucide React** — 預設圖示庫（複製網站過程中會替換為擷取的 SVG）
 
-## How It Works
+## 運作原理
 
-The `/clone-website` skill runs a multi-phase pipeline:
+`/clone-website` skill 會執行多階段管線流程：
 
-1. **Reconnaissance** — screenshots, design token extraction, interaction sweep (scroll, click, hover, responsive)
-2. **JS animation interception** — fingerprints loaded libraries, dumps every `@keyframes` rule, then injects a GSAP/ScrollTrigger hook with `addInitScript` so a single reload + full scroll captures every tween's `target`, `vars`, and timestamp into `docs/sites/<hostname>/research/animation-libraries.json`
-3. **Foundation** — updates fonts, colors, globals, downloads all assets
-4. **Component Specs** — writes detailed spec files (`docs/sites/<hostname>/specs/`) with exact computed CSS values, states, behaviors, and content
-5. **Parallel Build** — dispatches builder agents in git worktrees, one per section/component, with each section's matching animation calls inlined into the prompt
-6. **Assembly & QA** — merges worktrees, wires up the page, runs visual diff against the original
+1. **偵察與資料蒐集（Reconnaissance）** — 頁面截圖、設計 Token 擷取、互動掃描（捲動、點擊、懸停、響應式斷點）
+2. **JS 動畫攔截（JS animation interception）** — 辨識已載入的動畫函式庫、匯出所有 `@keyframes` 規則，並透過 `addInitScript` 注入 GSAP/ScrollTrigger Hook，只需一次重新載入加上完整捲動，即可將每個 Tween 的 `target`、`vars` 與時間戳記記錄至 `docs/sites/<hostname>/research/animation-libraries.json`
+3. **基礎架構建置（Foundation）** — 更新字體、色彩、全域樣式，並下載所有靜態資源
+4. **元件規格撰寫（Component Specs）** — 撰寫詳細的規格文件（`docs/sites/<hostname>/specs/`），包含精確的計算後 CSS 數值、狀態、互動行為與真實內容
+5. **平行建置（Parallel Build）** — 在獨立的 git worktree 中平行派發建置代理，每個區塊或元件一個代理，並將對應的動畫呼叫直接內嵌至提示詞中
+6. **組裝與品質驗證（Assembly & QA）** — 合併各個 worktree、串接完整頁面，並與原始網站進行視覺比對檢查
 
-Each builder agent receives the full component specification inline — exact `getComputedStyle()` values, interaction models, multi-state content, responsive breakpoints, asset paths, **and the precise GSAP/ScrollTrigger calls that target its DOM**. No guessing.
+每個建置代理都會直接取得完整的元件規格 —— 精確的 `getComputedStyle()` 數值、互動模型、多狀態內容、響應式斷點、資源路徑，**以及針對該區塊 DOM 的精確 GSAP/ScrollTrigger 呼叫參數**，完全無需臆測。
 
-### Animation Capture in Detail
+### 動畫擷取細節
 
-The interceptor lives in Phase 1 of `.claude/skills/clone-website/SKILL.md`. Three coordinated steps:
+攔截器實作於 `.claude/skills/clone-website/SKILL.md` 的 Phase 1，包含三個協同步驟：
 
 ```javascript
 // 1. Fingerprint loaded libraries
@@ -123,7 +123,7 @@ JSON.stringify({
 // 3. Reload, scroll the full page, then read back window.__gsapCalls.
 ```
 
-The result is a structured JSON record like:
+輸出會是結構化的 JSON 紀錄，範例如下：
 
 ```json
 {
@@ -138,184 +138,183 @@ The result is a structured JSON record like:
 }
 ```
 
-If no JS animation library is detected, the file is still written with `detected` flags all `false` and an empty `calls` array — downstream phases check this file unconditionally.
+如果未偵測到任何 JS 動畫函式庫，系統仍會寫入該檔案，其中 `detected` 旗標皆為 `false`、`calls` 為空陣列 —— 後續階段會無條件讀取此檔案。
 
-## Use Cases
+## 適用情境
 
-- **Platform migration** — rebuild a site you own from WordPress/Webflow/Squarespace into a modern Next.js codebase, **without losing the GSAP timeline that took weeks to tune**
-- **Lost source code** — your site is live but the repo is gone, the developer left, or the stack is legacy. Get the code back in a modern format, animations included
-- **Learning** — deconstruct how production sites achieve specific scroll-driven layouts, pinned sections, and parallax effects by working with real code and a captured animation log
+- **平台遷移** — 將你擁有的 WordPress / Webflow / Squarespace 網站重建為現代化的 Next.js 程式碼庫，**同時完整保留花費數週微調的 GSAP 時間軸動畫**
+- **原始碼遺失** — 網站仍在線上運作，但儲存庫遺失、開發者已離職或技術棧過舊時，將網站還原為現代化格式並保留動畫效果
+- **技術學習與拆解** — 透過真實程式碼與擷取到的動畫紀錄，拆解正式上線網站如何實作特定的捲動驅動版面、固定區塊與視差效果
 
-## Not Intended For
+## 不適用情境
 
-- **Phishing or impersonation** — this project must not be used for deceptive purposes, impersonation, or any activity that breaks the law.
-- **Passing off someone's design as your own** — logos, brand assets, and original copy belong to their owners.
-- **Violating terms of service** — some sites explicitly prohibit scraping or reproduction. Check first.
+- **網路釣魚或冒充他人** — 嚴禁將本專案用於欺騙、冒充或任何違法行為。
+- **將他人設計據為己有** — Logo、品牌資產與原創文案均歸原權利人所有。
+- **違反服務條款** — 部分網站明確禁止抓取或重製，使用前請先確認目標網站規範。
 
-## Project Structure
+## 專案結構
 
-### Template Root (Generator)
+### 範本根目錄（產生器）
 
-This is the template you clone and run `/clone-website` from. It contains the generator scaffolding:
+這是你 clone 下來並執行 `/clone-website` 的範本專案，包含產生器所需的基礎架構：
 
 ```
 src/
-  app/              # Next.js routes (template)
-  components/       # React components (template)
-    ui/             # shadcn/ui primitives
-    icons.tsx       # Extracted SVG icons (template)
-  lib/utils.ts      # cn() utility
-  types/            # TypeScript interfaces
-  hooks/            # Custom React hooks
+  app/              # Next.js 路由（範本）
+  components/       # React 元件（範本）
+    ui/             # shadcn/ui 原語元件
+    icons.tsx       # 擷取的 SVG 圖示元件（範本）
+  lib/utils.ts      # cn() 工具函式
+  types/            # TypeScript 型別介面
+  hooks/            # 自訂 React Hooks
 public/
-  images/           # Downloaded images from target (template)
-  videos/           # Downloaded videos from target (template)
-  seo/              # Favicons, OG images (template)
+  images/           # 從目標網站下載的圖片（範本）
+  videos/           # 從目標網站下載的影片（範本）
+  seo/              # Favicon、OG 圖片（範本）
 docs/
-  guides/                      # Reusable inspection guidance
-  sites/<hostname>/            # Existing site captures
-openspec/                      # Product and workflow specs; change history
-.agents/skills/                # OpenSpec workflow skills
-.claude/skills/clone-website/   # Canonical clone workflow
-.codex/skills/clone-website/    # Generated Codex copy
+  guides/                      # 可重複使用的網站檢視指南
+  sites/<hostname>/            # 既有的網站擷取範例紀錄
+openspec/                      # 產品與工作流程規格及變更紀錄
+.agents/skills/                # OpenSpec 工作流程 skills
+.claude/skills/clone-website/  # 主要的網站複製工作流程 skill
+.codex/skills/clone-website/   # 同步產生的 Codex 版本 skill
 scripts/
-  init-export-project.mjs      # Initialize an independent export project
-  sync-skills.mjs              # Regenerate the Codex clone skill
-AGENTS.md           # Agent instructions (single source of truth)
-CLAUDE.md           # Claude Code config (imports AGENTS.md)
+  init-export-project.mjs      # 初始化獨立的匯出專案
+  sync-skills.mjs              # 重新產生 Codex 版 clone skill
+AGENTS.md           # 代理指令（單一事實來源）
+CLAUDE.md           # Claude Code 設定（直接匯入 AGENTS.md）
 ```
 
-### Export Projects (Generated Clones)
+### 匯出專案（產生的複製網站）
 
-Each cloned website becomes an **independent Next.js project** under `export/<site-id>/`. These are complete, self-contained applications that can be moved, deployed, or archived independently.
+每個複製出來的網站都會成為 `export/<site-id>/` 底下的**獨立 Next.js 專案**。這些專案完整且自給自足，可獨立移動、部署或封存：
 
 ```
 export/
-  example.com/                    # Site ID derived from URL
+  example.com/                    # 由網址正規化產生的 Site ID
     src/
-      app/                        # Next.js routes (cloned site)
-      components/                 # React components (cloned site)
-        ui/                       # shadcn/ui primitives
-        icons.tsx                 # Extracted SVG icons
-      lib/utils.ts                # cn() utility
-      types/                      # TypeScript interfaces
-      hooks/                      # Custom React hooks
+      app/                        # Next.js 路由（複製網站）
+      components/                 # React 元件（複製網站）
+        ui/                       # shadcn/ui 原語元件
+        icons.tsx                 # 擷取的 SVG 圖示
+      lib/utils.ts                # cn() 工具函式
+      types/                      # TypeScript 型別介面
+      hooks/                      # 自訂 React Hooks
     public/
-      images/                     # Downloaded images
-      videos/                     # Downloaded videos
-      seo/                        # Favicons, OG images
+      images/                     # 下載的圖片
+      videos/                     # 下載的影片
+      seo/                        # Favicon、OG 圖片
     docs/
       sites/example.com/
-        research/                 # Findings and animation captures
-        specs/                    # Per-component specifications
-        screenshots/              # Visual references and comparisons
-    scripts/                      # Optional site asset scripts
-    package.json                  # Independent package.json
+        research/                 # 調查結果與動畫擷取紀錄
+        specs/                    # 各元件規格文件
+        screenshots/              # 視覺參考與比對截圖
+    scripts/                      # 網站資源輔助腳本（選用）
+    package.json                  # 獨立的 package.json
     package-lock.json
     tsconfig.json
     next.config.ts
     postcss.config.mjs
     eslint.config.mjs
     components.json
-    README.md                     # Site-specific documentation
-    export-manifest.json          # Metadata (source URL, created date, etc.)
+    README.md                     # 該網站專屬說明文件
+    export-manifest.json          # 中繼資料（來源網址、建立日期等）
     .gitignore
-  another-site.com--products/     # Another cloned site (different path)
+  another-site.com--products/     # 另一個複製網站（不同路徑）
 ```
 
-**Key points:**
-- Each `export/<site-id>/` is a complete Next.js project — run `npm install && npm run dev` inside it
-- The template root (`src/`, `public/`, `docs/` at top level) is **only used as a generator** — new clones don't modify it
-- Multiple clones are fully isolated — no shared files, no conflicts
-- Export projects are **not committed to git** (see `.gitignore`) — they are build artifacts
-- To deliver a clone, zip or copy the entire `export/<site-id>/` folder
+**重點說明：**
+- 每個 `export/<site-id>/` 都是完整的 Next.js 專案 —— 在該目錄內直接執行 `npm install && npm run dev` 即可啟動
+- 範本根目錄（頂層的 `src/`、`public/`、`docs/`）**僅作為產生器使用** —— 新的複製專案不會更動到範本根目錄
+- 多個複製網站彼此完全隔離 —— 沒有共用檔案，也不會互相衝突
+- 匯出專案**不會提交至 git**（詳見 `.gitignore`）—— 它們屬於建置產出物
+- 若要交付某個複製網站，只需壓縮或複製整個 `export/<site-id>/` 資料夾即可
 
-## Commands
+## 常用指令
 
-### Template Root (Generator)
+### 範本根目錄（產生器）
 
 ```bash
-npm run dev    # Start dev server (template)
-npm run build  # Production build (template)
-npm run lint   # ESLint check
-npm run typecheck # TypeScript check
-npm run check  # Run lint + typecheck + build
+npm run dev       # 啟動開發伺服器（範本）
+npm run build     # 建置正式環境版本（範本）
+npm run lint      # ESLint 檢查
+npm run typecheck # TypeScript 型別檢查
+npm run check     # 依序執行 lint + typecheck + build
 ```
 
-### Export Projects (Cloned Sites)
+### 匯出專案（已複製的網站）
 
-After running `/clone-website`, each site is in `export/<site-id>/`:
+執行 `/clone-website` 後，每個網站會位於 `export/<site-id>/`：
 
 ```bash
 cd export/<site-id>
-npm install           # Install dependencies (first time only)
-npm run dev           # Start dev server at localhost:3000
-npm run build         # Production build
-npm run lint          # ESLint check
-npm run typecheck     # TypeScript check
-npm run check         # Run lint + typecheck + build
+npm install           # 安裝相依套件（僅首次需要）
+npm run dev           # 於 localhost:3000 啟動開發伺服器
+npm run build         # 建置正式環境版本
+npm run lint          # ESLint 檢查
+npm run typecheck     # TypeScript 型別檢查
+npm run check         # 依序執行 lint + typecheck + build
 ```
 
-### If using docker
+### 使用 Docker
 
 ```bash
-docker compose up app --build # build and run the app
-docker compose up dev --build # run the app in dev mode on port 3001
+docker compose up app --build # 建置並執行正式環境容器
+docker compose up dev --build # 以開發模式於 port 3001 啟動
 ```
 
-## Export Workflow
+## 匯出工作流程
 
-When you run `/clone-website <url1> [<url2> ...]`:
+當你執行 `/clone-website <url1> [<url2> ...]` 時，流程如下：
 
-1. **Site ID generation** — Each URL is normalized to a filesystem-safe site ID:
+1. **產生 Site ID** — 每個網址會被正規化為適合檔案系統使用的 Site ID：
    - `https://example.com` → `example.com`
    - `https://example.com/products/item` → `example.com--products-item`
    - `https://example.com/search?q=test` → `example.com--search--<hash>`
 
-2. **Conflict detection** — If `export/<site-id>/` already exists, the skill reports the conflict and asks before overwriting. Use `--force` to override.
+2. **衝突偵測** — 若 `export/<site-id>/` 已存在，skill 會回報衝突並在覆寫前詢問確認；使用 `--force` 可強制覆寫。
 
-3. **Project initialization** — A complete Next.js project is created at `export/<site-id>/` with all config, source files, and directory structure copied from the template.
+3. **初始化專案** — 系統會在 `export/<site-id>/` 建立完整的 Next.js 專案，從範本複製所有設定檔、原始碼與目錄結構。
 
-4. **Cloning happens inside the export project** — All extraction, building, and verification runs from within `export/<site-id>/`. The template root is untouched.
+4. **在匯出專案內進行複製** — 所有擷取、建置與驗證都會在 `export/<site-id>/` 內執行，不會動到範本根目錄。
 
-5. **Verification** — After cloning, `npm run check` runs inside the export project to verify it builds cleanly.
+5. **建置驗證** — 複製完成後，會在匯出專案內執行 `npm run check`，確認能乾淨通過檢查與建置。
 
-6. **Reporting** — The skill reports the export project path and startup commands.
+6. **結果回報** — Skill 會回報匯出專案的路徑與啟動指令。
 
-### Moving/Delivering a Clone
+### 移動或交付複製專案
 
-Each export project is self-contained. To share or deploy:
+每個匯出專案都可獨立運作，分享或部署的方式如下：
 
 ```bash
-# Copy to another location
+# 複製到其他位置
 cp -r export/example.com /path/to/destination/
 
-# Or zip for delivery
+# 或壓縮後交付
 zip -r example.com-clone.zip export/example.com
 
-# Recipient just needs to:
+# 接收端只需執行：
 cd example.com
 npm install
 npm run dev
 ```
 
-No template dependency — the export project has everything it needs.
+完全不依賴原本的範本 —— 匯出專案已包含所需的一切檔案。
 
-## Updating Agent Guidance
+## 更新代理指引與 Skill
 
-`AGENTS.md` is the project guidance source. `CLAUDE.md` imports it, and Codex reads it directly. The canonical clone workflow is `.claude/skills/clone-website/SKILL.md`; regenerate its Codex copy after edits:
+`AGENTS.md` 是專案指引的單一事實來源；`CLAUDE.md` 直接匯入該檔案，而 Codex 則直接讀取它。網站複製流程的主要規格位於 `.claude/skills/clone-website/SKILL.md`，編輯後請執行以下指令重新產生 Codex 版本：
 
 ```bash
 node scripts/sync-skills.mjs
 ```
 
-`.agents/skills/` contains OpenSpec skills and is managed by OpenSpec. `docs/guides/` contains reusable guidance. New clones belong under `export/<site-id>/`, with captures at `export/<site-id>/docs/sites/<hostname>/`. The existing COUNTER example remains in `docs/sites/counter-digital.jp/`.
-
+`.agents/skills/` 存放 OpenSpec skills，並由 OpenSpec 管理；`docs/guides/` 包含可重複使用的網站檢視指南。新的複製網站應放置在 `export/<site-id>/`，其擷取紀錄位於 `export/<site-id>/docs/sites/<hostname>/`。既有的 COUNTER 範例則保留在 `docs/sites/counter-digital.jp/`。
 
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=JCodesMore/ai-website-cloner-template&type=Date)](https://star-history.com/#JCodesMore/ai-website-cloner-template&Date)
 
-## License
+## 授權條款
 
 MIT
